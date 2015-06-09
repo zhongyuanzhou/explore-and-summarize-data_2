@@ -1,0 +1,1521 @@
+---
+title: "Quality of White Wine"
+author: "by Zhongyuan Zhou"
+date: "May 6, 2015"
+output: html_document
+---
+
+# Dataset
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
+                      echo=TRUE, warning=FALSE, message=FALSE)
+```
+
+## Load packages
+```{r echo=TRUE, message=FALSE, warning=FALSE, packages}
+# Load all of the packages using in the analysis in this code chunk.
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(reshape)
+library(reshape2)
+library(ggthemes)
+library(gridExtra)
+library(memisc)
+library(RColorBrewer)
+library(GGally)
+library(lsr)
+library(grid)
+library(ellipse)
+library(MASS)
+library(lattice)
+```
+
+## Load the data
+```{r echo=TRUE, Load_the_Data}
+# Current work directory
+getwd()
+# Change directory to the one where the dataset is located at
+setwd("C:/Nanodegree-program/Data Analyst/P3 - Explore and Summarize Data/Final Project")
+# Load the Data
+ww<-read.csv("wineQualityWhites.csv",sep=",")
+```
+
+# Univariate Plots Section
+## Variables
+```{r echo=TRUE}
+names(ww)
+```
+
+## Change the variable name "density" to "mass.density"
+To avoid confusion of the variable "density" and distribution "denisity" in ggplot, I rename the variable "density" to "mass.density".
+
+```{r}
+colnames(ww)[colnames(ww)=="density"] <- "mass.density"
+```
+
+## Histogram plots and frequency polygons of variables
+
+In order to explore distribution of each individual variable, I will plot histogram plots and frequency polygons of all variables.
+
+### Function to create Histogram plots and frequency polygons
+```{r}
+plot_hist_fre_poly <- function(x_str, bin_width, xmin, xmax, dx, ymin, ymax, dy)
+  {
+    ggplot(aes_string(x = x_str), data = ww) + 
+    geom_histogram(binwidth = bin_width, fill = "#3366FF") + 
+    scale_x_continuous(limits = c(xmin, xmax), breaks = seq(xmin, xmax, dx)) +
+    scale_y_continuous(limits = c(ymin, ymax), breaks = seq(ymin, ymax, dy)) +
+    ggtitle(" ") + geom_freqpoly(binwidth = bin_width, color = "red")
+  }
+```
+
+### Fixed acidity
+```{r}
+plot_hist_fre_poly(x_str = "fixed.acidity", bin_width = 0.3, 
+                   xmin = 4, xmax = 10, dx = 1, 
+                   ymin = 0, ymax = 900, dy = 100)
+```
+
+    Normal-like distribution
+
+### Volatile acidity
+```{r}
+plot_hist_fre_poly(x_str = "volatile.acidity", bin_width = 0.01, 
+                   xmin = 0.1, xmax = 0.5, dx = 0.1, 
+                   ymin = 0, ymax = 300, dy = 50)
+```
+
+    Normal-like distribution
+
+### Citric acid
+```{r}
+plot_hist_fre_poly(x_str = "citric.acid", bin_width = 0.02, 
+                   xmin = 0.1, xmax = 0.7, dx = 0.1, 
+                   ymin = 0, ymax = 550, dy = 50)
+```
+
+    Long-tailed normal-like distribution
+
+### Residual sugar
+```{r}
+plot_hist_fre_poly(x_str = "residual.sugar", bin_width = 0.0984, 
+                   xmin = 0, xmax = 20, dx = 2, 
+                   ymin = 0, ymax = 60, dy = 10)
+```
+
+    Non-normal distribution
+
+### Chlorides
+```{r}
+plot_hist_fre_poly(x_str = "chlorides", bin_width = 0.003, 
+                   xmin = 0, xmax = 0.1, dx = 0.02, 
+                   ymin = 0, ymax = 550, dy = 50)
+```
+
+    Long-tailed normal-like distribution
+
+### Free sulfur dioxide
+```{r}
+plot_hist_fre_poly(x_str = "free.sulfur.dioxide", bin_width = 5, 
+                   xmin = 0, xmax = 100, dx = 20, 
+                   ymin = 0, ymax = 650, dy = 50)
+```
+
+    Long-tailed normal-like distribution
+
+### Total sulfur dioxide
+```{r}
+plot_hist_fre_poly(x_str = "total.sulfur.dioxide", bin_width = 10, 
+                   xmin = 0, xmax = 300, dx = 50, 
+                   ymin = 0, ymax = 550, dy = 50)
+```
+
+    Long-tailed normal-like distribution
+
+### Mass density
+```{r}
+plot_hist_fre_poly(x_str = "mass.density", bin_width = 0.0004, 
+                   xmin = 0.985, xmax = 1.005, dx = 0.005, 
+                   ymin = 0, ymax = 300, dy = 50)
+```
+    Normal-like distribution
+
+### pH
+```{r}
+plot_hist_fre_poly(x_str = "pH", bin_width = 0.03, 
+                   xmin = 2.8, xmax = 3.6, dx = 0.2, 
+                   ymin = 0, ymax = 450, dy = 50)
+```
+
+    Normal-like distribution
+
+### Sulphates
+```{r}
+plot_hist_fre_poly(x_str = "sulphates", bin_width = 0.02, 
+                   xmin = 0.2, xmax = 0.8, dx = 0.1, 
+                   ymin = 0, ymax = 400, dy = 50)
+```
+
+    Normal-like distribution
+
+### Alcohol
+```{r}
+plot_hist_fre_poly(x_str = "alcohol", bin_width = 0.1, 
+                   xmin = 8, xmax = 14, dx = 1, 
+                   ymin = 0, ymax = 250, dy = 50)
+```
+
+    Non-normal distribution
+
+### Quantity
+```{r}
+plot_hist_fre_poly(x_str = "quality", bin_width = 1, 
+                   xmin = 3, xmax = 10, dx = 1, 
+                   ymin = 0, ymax = 2500, dy = 500)
+```
+
+    Normal-like distribution
+
+## Statistical properties
+```{r}
+summary(ww)
+```
+Quality changes from 3.00 to 9.00. The median quality is 6.0, which is closed to mean 5.878. About 75% of white wines are ranked in between 3.0~6.0 and about 50% of white wines are ranked in between 5.0~6.0. The residual sugar ranges from 0.6 to 65.8 with a median of 5.2 and a mean of 6.391. Thus its distribution has a long tail. The minimum and maximum of free sulfur dioxide (SO2) are 2.0 and 289.0, respectively, with a median of 34.00. Thus the distribution of free SO2 has a huge dispersion and very long tail. Similarly, the distributions of volatile acidity, citric acid, chlorides, free sulfur dioxide, and total sulfur dioxide have large dispersions and long tails. The statistical properties of all the other variables are also shown above.
+
+## Observation from univariate plots and statistical properties
+Distributions of variables can be attributed into three types: Normal-like distribution, long-tailed normal-like distribution, and non-normal-like distribution.
+
+Normal-like distributions are fixed acidity, volatile acidity, pH, sulphates, mass density, and quality. 
+
+Long-tailed normal-like distributions are citric acid, chlorides, free sulfur dioxide, and total sulfur dioxide. The long-tailed normal-like distribution can be converted to normal-like distribution by removal of outliers or use of proper scales (e.g., log scale or square root scale etc.).
+
+Non-normal-like distributions are residual sugar and alcohol. The main distribution of residual sugar ranges from 2 to 20. Two deep dips appear around 6 and 12, respectively. They divide the distribution into three parts: [0.6, 6), [6, 12), [12, 65.8], which represent low sugar, medium sugar and high sugar, respectively. The distribution of alcohol is a three-peak distribution in the range from 8 to 14.2. It is divided into three distributions in the range of [8.0, 9.5), [9.5, 11.5), and [11.5, 14.20], respectively. They represent low alcohol, medium alcohol, and high alcohol, respectively.
+
+## Unusual distributions and operations on the data
+The distributions of residual sugar and alcohol are non-normal-like. In order to explore whether these distributions can be transformed to normal-like, a logarithm transformation is applied to variables residual.sugar and alcohol.
+
+### Log-transformed residual sugar
+```{r}
+plot_hist_fre_poly(x_str = "log10(residual.sugar)", bin_width = 0.05, 
+                   xmin = -0.3, xmax = 1.5, dx = 0.2, 
+                   ymin = 0, ymax = 400, dy = 50)
+```
+    
+    Distribution of residual sugar becomes bimodal distribution after transformation which is still non-normal-like distribution.
+    
+### Log-transformed alcohol
+```{r}
+plot_hist_fre_poly(x_str = "log10(alcohol)", bin_width = 0.04, 
+                   xmin = 0.8, xmax = 1.2, dx = 0.1, 
+                   ymin = 0, ymax = 1400, dy = 200)
+```
+    
+    Distribution of alcohol is closed to normal-like distribution after transformation.
+
+## Creation of new categorical variables
+Based on the observation above, I will create two new categorical variables, mass.density.level and alcohol.degree for mass density and alcohol, respectively. The mass density is divided into three levels: low mass density [0.9871, 0.9920), medium mass density [0.9920, 0.9950), and high mass density [0.9950, 1.0390]. The alcohol is divided into three degrees: low alcohol [8.0, 9.5), medium alcohol [9.5, 11.5), and high alcohol [11.5, 14.20]. In addition, quality depicted by integers 0~10 may not be that easy to be connected to traditional quality. I will divide the quality into three ranks: low quality [3,5), medium quality (5,7], and high quality (7,9]. I will also create a new categorical variable quality.rank for these ranks.
+
+### Creation of categorical variable mass.density.level 
+```{r}
+ww$mass.density.level <- cut(ww$mass.density, c(0.9871, 0.9920, 0.9950, 1.0390), 
+                             labels = c("low.mass.density", 
+                                        "medium.mass.density",
+                                        "high.mass.density"), 
+                             include.lowest = T)
+
+summary(ww$mass.density.level)
+```
+
+    In the dataset, the numbers of wines for low, medium and high mass density are close to each other.
+
+### Creation of categorical variable alcohol.degree 
+```{r}
+ww$alcohol.degree <- cut(ww$alcohol, c(8,9.5,11.5,14.2), 
+                         labels = c("low.alcohol", 
+                                    "medium.alcohol",
+                                    "high.alcohol"), 
+                         include.lowest = T)
+
+summary(ww$alcohol.degree)
+```
+
+    In the dataset, the number of medium alcohol wines is much larger than that of low or high alcohol.
+
+### Creation of categorical variable quality.rank
+```{r}
+ww$quality.rank <- cut(ww$quality, c(3,5,7,9), 
+                       labels = c("low.quality", 
+                                  "medium.quality", 
+                                  "high.quality"), 
+                       include.lowest = T)
+
+summary(ww$quality.rank)
+```
+
+    In the dataset, the number of medium quality ranks is much larger than that of low and high alcohol.
+
+
+# Univariate Analysis
+
+### structure of dataset
+```{r}
+str(ww)
+```
+There are 16 variables and 4898 observations. The Variable 1 is an integer variable which is an observation id, the variables 2~12 are numerical variables which are input variables (based on physicochemical tests), and the variable 13 is an integer variable which is an output variable (based on sensory data). Variables 14~16 are factor variables created. The variable names are given below [1].
+
+    1."X": Id of observations (integer variable)
+
+    2."fixed.acidity": fixed acidity (tartaric acid - g/dm^3)
+
+    3."volatile.acidity": volatile acidity (acetic acid - g/dm^3)
+
+    4."citric.acid": citric acid (g/dm^3)
+
+    5."residual.sugar": residual sugar (g/dm^3)
+
+    6."chlorides": chlorides (sodium chloride - g/dm^3
+
+    7."free.sulfur.dioxide": free sulfur dioxide (mg/dm^3)
+
+    8."total.sulfur.dioxide": total sulfur dioxide (mg/dm^3)
+
+    9."mass.density": density (g/cm^3)
+
+    10."pH": pH value
+
+    11."sulphates": sulphates (potassium sulphate - g/dm3)
+
+    12."alcohol": alcohol (% by volume)
+
+    13."quality": quality (integer variable scored between 0 and 10)
+
+    14."mass.density.level": mass density levels of mass density (factor variable)
+    
+    15."alcohol.degree": alcohol degree of the wine (factor variable)
+    
+    16."quality.rank": quality rank of quanlty) (factor variable)
+    
+Distributions of numeric and integer variables are attributed into three types: Normal-like distribution, long-tailed normal-like distribution, and non-normal distribution. About 75% of white wines are ranked in between 3.0~6.0 and about 50% of white wines are ranked in between 5.0~6.0. 
+
+### Main feature(s) of interest
+The main features in the dataset are mass density, alcohol, and residual sugar. I would like to explore which features are the most important to determine wine quality. Intuitively, wine quality is greatly impacted by chemical characteristics (such as alcohol and residual sugar as well as citric acid) but is insensitive to physical characteristics (such as mass density). I will examine which features will be more significant to wine quality.
+
+### Other features that may support the main feature(s) of interest
+Apart from the main features, all the other features may influence wine quality through correlation directly to quality or through correlation to the main features. However I assume that pH, vcitric acid, and total sulfur dioxide as well as their combination are features that contribute most to the wine quality. I will figure out which ones are the most important to wine quality first by exploring the correlation between the features and wine quality in next section.
+
+## New variables created from existing variables
+In order to connect my analysis to traditional awareness, three new categorical variables are created: mass.density.level, alcohol.degree, and quality.rank. The first two variables are created by their distributions, and the third one is created by dividing the range of quality into three subdivisions uniformly. I understand that the variables created this way may not be consistent completely with professional ones. But it is good enough for the project here.
+
+## Unusual distributions and operations on the data
+Original distributions of residual sugar and alcohol are non-normal and unusual. I log-transform them in order to gain normal distributions. The transformed distribution of alcohol is closed to a normal-like distribution. However, the transformed distribution of residual sugar is a bimodal distribution. 
+
+
+# Bivariate Plots Section
+
+## Correlation analysis
+### Create a new dataframe without categorical variables
+```{r}
+cor_vars <- names(ww) %in% c("X", "mass.density.level", 
+                             "alcohol.degree", "quality.rank")
+
+ww_num <- ww[!cor_vars]
+```
+
+### Calculation of correlation coefficients
+```{r}
+correlate(ww_num)
+```
+
+### Correlation Plots
+
+In order to explore correlations of all numeric variables, I will plot a colorRamp plot of the correlations.
+
+```{r}
+ctab <- cor(ww_num)
+
+colorfun <- colorRamp(c("#CC0000", "white", "#3366CC"), space = "Lab")
+
+plotcorr(ctab, mar = c(0, 0, 0, 0), col = rgb(colorfun((ctab+1)/2), 
+                                              maxColorValue = 255))
+```
+
+### Observations from correlation calculation and correlation plots
+In correlation plots, the "blue" symbol represents positive correlation coefficients, while the "red" symbol represents negative correlation coefficients. The greater the deviation of the symbol from a circle, the lager the correlation coefficient. Obviously, the correlation coefficients are quite different parts of variables in the dataset. I introduce a correlation "order" to specify the correlation strength.
+
+#### 1. First-order correlations
+    Let "r" = correlation coefficient. The 1st-order correlation is a strong correlation with abs(r) > 0.7. It includes the correlations of variable pairs below. 
+    [density, residual sugar]: r = 0.839
+    [density, alcohol]: r = -0.780
+    
+#### 2. Second-order correlations
+    The 2nd-order correlation is a medium correlation with 0.3 < abs(r) <= 0.7 . It includes the correlations of variable pairs below. 
+    [quality, density]: r = -0.307
+    [quality, alcohol]: r = 0.436
+    
+    [density, total sulfur dioxide]: r = 0.530
+    
+    [alcohol, total sulfur dioxide]: r = -0.449
+    [alcohol, residual sugar]: r = -0.451 
+    [alcohol, chlorides]: r = -0.360
+    
+    [total sulfur dioxide, free sulfur dioxide]: r = 0.616
+    [residual sugar, total sulfur dioxide]: r = 0.401
+    [pH, fixed acidity]: r = -0.426
+    
+#### 3. Third-order correlations
+    The 3rd-order correlation is a weak correlation with 0.2 < Abs(r) <= 0.3 . It includes the correlations of variable pairs below. 
+    
+    [quality, chlorides]: r = -0.210
+    [density, free sulfur dioxide]: r = 0.294
+    [density, fixed acidity]: r = 0.265
+    [density, chlorides]: r = 0.257
+    [alcohol, free sulfur dioxide]: r = -0.250
+    [fixed acidity, citric acid]: r = 0.289
+    [residual sugar, free sulfur dioxide]: r = 0.299
+    
+## My data analysis focus
+    It is shown from the correlation analysis above, all the strong correlations occur through density: density and alcohol (negative) as well as density and residual sugar (positive). Thus the physical characteristic density is one of most important features of the dataset.
+    
+    Up to the 2nd-order correlation, wine quality is only correlated to density and alcohol. It is again demonstrated that density is one of most important features to the quality.
+    
+    Apart from the 1st-order correlation between density and alcohol, both density and alcohol are correlated to residual sugar (via the 1st-order correlation with density and via the 2nd-order correlation with alcohol) and total sulfur dioxide (via the 2nd-order correlation with both). In addition, alcohol and chlorides as well as residual sugar and total sulfur dioxide are correlated by the 2nd-order correlation.
+    
+    The correlation tree is:
+    The 1st generation: quality
+    The 2nd generation: density and alcohol
+    The 3rd generation: residual sugar, total sulfur dioxide, and chlorides.
+    
+    The scenario of my data analysis in this project is to investigate how the features (density, alcohol, residual sugar, total sulfur dioxide, and chlorides) individually impact wine quality as well as how the feature combinations influence wine quality.
+
+## Scatter plots versus quality with linear fit as well as box plots by quality rank
+
+In order to explore details of correlations between quality and main features, I will plot scatter plots, box plots, and linear fits of the main features vs. quality.
+
+### Function to create scatter plots and linear fit
+```{r}
+plot_scat_plot <- function(y_str,x_str, ymin, ymax, dy, xmin, xmax, dx)
+  {
+    ggplot(aes_string(y = y_str, x = x_str), data = ww) + 
+    geom_jitter(alpha = 1/4, color = "#3366FF") + 
+    scale_y_continuous(limits = c(ymin, ymax), breaks = seq(ymin,  ymax, dy)) +
+    ggtitle("Scatter plot & linear fit") + 
+    stat_smooth(method = "lm", color = "red") + 
+    scale_x_continuous(limits = c(xmin, xmax), breaks = seq(xmin, xmax, dx))
+  }
+```
+
+### Function to create box plots
+```{r}
+plot_box_plot <- function(y_str, x_str, ymin, ymax) 
+  {
+    ggplot(aes_string(y = y_str, x = x_str),data = ww) + 
+    geom_boxplot() + 
+    coord_cartesian(ylim = c(ymin, ymax)) + 
+    ggtitle("Box plot")
+  }
+```
+
+### Residual sugar versus quality
+```{r}
+p1 <- plot_scat_plot(y_str = "residual.sugar", x_str = "quality", 
+                     ymin = 0, ymax = 20, dy = 5, 
+                     xmin = 3, xmax = 9, dx = 2)
+
+p2 <- plot_box_plot(y_str= "residual.sugar", x_str = "quality.rank", 
+                    ymin = 0, ymax = 20)
+
+grid.arrange(p1, p2, ncol = 2)
+
+by(ww$residual.sugar, ww$quality.rank, summary)
+```
+    
+    Correlation between residual sugar and quality is negative overall. The medians and the 3rd quartiles decrease with wine quality but the 1st quartiles increase with wine quality. Approximately the residual sugar decreases with wine quality. Thus higher quality rank contains a little less residual sugar.
+    
+### Chlorides versus quality
+```{r}
+p1 <- plot_scat_plot(y_str = "chlorides", x_str = "quality", 
+                     ymin = 0.015, ymax = 0.075, dy = 0.005, 
+                     xmin = 3, xmax = 9, dx = 2)
+
+p2 <- plot_box_plot(y_str= "chlorides", x_str = "quality.rank", 
+                    ymin = 0.015, ymax = 0.075)
+
+grid.arrange(p1, p2, ncol = 2)
+
+by(ww$chlorides, ww$quality.rank, summary)
+```
+    
+    Correlation between chlorides and quality is negative. The correlation can be well represented by a linear correlation. This is because that the quality is also correlated directly to chlorides by the 3rd-order correlation with r = -0.210. The medians and quartiles decrease with wine quality. Thus higher quality ranks contain smaller amount of chlorides.
+
+### Total sulfur dioxide versus quality
+```{r}
+p1 <- plot_scat_plot(y_str = "total.sulfur.dioxide", x_str = "quality", 
+                     ymin = 0, ymax = 300, dy = 50, 
+                     xmin = 3, xmax = 9, dx = 2)
+
+p2 <- plot_box_plot(y_str= "total.sulfur.dioxide", x_str = "quality.rank", 
+                    ymin = 0, ymax = 300)
+
+grid.arrange(p1, p2, ncol = 2)
+
+by(ww$total.sulfur.dioxide, ww$quality.rank, summary)
+```
+   
+   Correlation between total sulfur dioxide and quality is negative. The medians and quartiles decrease with wine quality. Thus higher quality rank contains less total sulfur dioxide.
+
+### Mass density versus quality
+```{r}
+p1 <- plot_scat_plot(y_str = "mass.density", x_str = "quality", 
+                     ymin = 0.986, ymax = 1.004, dy = 0.002, 
+                     xmin = 3, xmax = 9, dx = 2)
+
+p2 <- plot_box_plot(y_str= "mass.density", x_str = "quality.rank", 
+                    ymin = 0.986, ymax = 1.004)
+
+grid.arrange(p1, p2, ncol = 2)
+
+by(ww$mass.density, ww$quality.rank, summary)
+```
+    
+    Correlation between mass density and quality is negative and nearly linear. The medians and quartiles decrease with wine quality. Thus the mass density of higher quality rank is smaller.
+
+### Alcohol versus quality
+```{r}
+p1 <- plot_scat_plot(y_str = "alcohol", x_str = "quality", 
+                     ymin = 8, ymax = 15, dy = 1, 
+                     xmin = 3, xmax = 9, dx = 2)
+
+p2 <- plot_box_plot(y_str= "alcohol", x_str = "quality.rank", 
+                    ymin = 8, ymax = 15)
+
+grid.arrange(p1, p2, ncol = 2)
+
+by(ww$alcohol, ww$quality.rank, summary)
+
+```
+    
+    Correlation between alcohol and quality is positive and nearly linear. The medians and quartiles increase with alcohol. Thus higher quality rank contains more alcohol and lower quality rank contains less alcohol.
+
+## Observations from the plots
+Wine quality is proportional to alcohol, inversely proportional to chlorides, total sulfur dioxide, mass density, and residual sugar. Thus higher quality rank should have less mass density and contain higher alcohol content, lower amount of chlorides, lower amount of total sulfur dioxide, and lower amount of residual sugar.
+
+## Scatter plots versus alcohol with linear fit as well as box plots by alcohol degree
+
+In order to explore details of correlations between alcohol and other main features, I will plot scatter plots, box plots, and linear fits of the main features vs. alcohol.
+
+### Residual sugar versus alcohol
+```{r, alcoholVSresidual.sugar}
+p1 <- plot_scat_plot(y_str = "residual.sugar", x_str = "alcohol", 
+                     ymin = 0, ymax = 20, dy = 5, 
+                     xmin = 8, xmax = 14.2, dx = 2)
+
+p2 <- plot_box_plot(y_str= "residual.sugar", x_str = "alcohol.degree", 
+                    ymin = 0, ymax = 20)
+
+grid.arrange(p1, p2, ncol = 2)
+
+by(ww$residual.sugar, ww$alcohol.degree, summary)
+```
+    
+    Correlation between residual sugar and alcohol is negative. The medians and quartiles of Low and medium alcohol wines decrease with alcohol degree. Generally the lower quality ranks contain higher residual sugar and higher alcohol wines contain lower residual sugar.
+    
+### Chlorides versus alcohol
+```{r}
+p1 <- plot_scat_plot(y_str = "chlorides", x_str = "alcohol", 
+                     ymin = 0.01, ymax = 0.07, dy = 0.01, 
+                     xmin = 8, xmax = 14.2, dx = 2)
+
+p2 <- plot_box_plot(y_str= "chlorides", x_str = "alcohol.degree", 
+                    ymin = 0.01, ymax = 0.07)
+
+grid.arrange(p1, p2, ncol = 2)
+
+by(ww$chlorides, ww$alcohol.degree, summary)
+```
+    
+    Correlation between chlorides and alcohol is negative and nearly linear. The medians and quartiles decrease approximately linearly with wine alcohol. Thus higher alcohol wines contain smaller amount of chlorides.
+
+### Total sulfur dioxide versus alcohol
+```{r}
+p1 <- plot_scat_plot(y_str = "total.sulfur.dioxide", x_str = "alcohol", 
+                     ymin = 50, ymax = 250, dy = 50, 
+                     xmin = 8, xmax = 14.2, dx = 2)
+
+p2 <- plot_box_plot(y_str= "total.sulfur.dioxide", x_str = "alcohol.degree", 
+                    ymin = 50, ymax = 250)
+
+grid.arrange(p1, p2, ncol = 2)
+
+by(ww$total.sulfur.dioxide, ww$alcohol.degree, summary)
+```
+   
+   Correlation between total sulfur dioxide and alcohol is negative nearly linear. The medians and quartiles decrease with alcohol approximately linearly. Lower alcohol wines contain higher total sulfur dioxide and higher alcohol wines contain lower total sulfur dioxide.
+
+### mass density versus alcohol
+```{r, alcoholVSmass.density}
+p1 <- plot_scat_plot(y_str = "mass.density", x_str = "alcohol", 
+                     ymin = 0.987, ymax = 1.003, dy = 0.002, 
+                     xmin = 8, xmax = 14.2, dx = 2)
+
+p2 <- plot_box_plot(y_str= "mass.density", x_str = "alcohol.degree", 
+                    ymin = 0.987, ymax = 1.003)
+
+grid.arrange(p1, p2, ncol = 2)
+
+by(ww$mass.density, ww$alcohol.degree, summary)
+```
+    
+    Correlation between mass density and alcohol is negative and linear. The median and quartiles decrease linearly with alcohol. The mass density of lower alcohol wine is higher and the mass density of higher alcohol wine is lower.
+
+### Quality versus alcohol
+```{r}
+p1 <- plot_scat_plot(y_str = "quality", x_str = "alcohol", 
+                     ymin = 3, ymax = 9, dy = 1, 
+                     xmin = 8, xmax = 14.2, dx = 2)
+
+p2 <- plot_box_plot(y_str= "quality", x_str = "alcohol.degree", 
+                    ymin = 3, ymax = 9)
+
+grid.arrange(p1, p2, ncol = 2)
+
+by(ww$quality, ww$alcohol.degree, summary)
+
+```
+
+    Correlation between alcohol and quality is positive. The quality increases with alcohol overall. Thus higher quality ranks contain higher alcohol.
+    
+## Observations from the plots
+Alcohol is inversely proportional to residual sugar, chlorides, total sulfur dioxide, and mass density, but proportional to quality. Thus higher alcohol wine should contain lower amount of residual sugar, chlorides, and total sulfur dioxide, and have less mass density. This kind of wine is higher quality rank.
+
+## Scatter plots versus mass density with linear fit as well as box plots by mass density level
+
+In order to explore details of correlations between mass density and other main features, I will plot scatter plots, box plots, and linear fits of the main features vs. mass density.
+
+### Residual sugar versus mass density
+```{r}
+p1 <- plot_scat_plot(y_str = "residual.sugar", x_str = "mass.density", 
+                     ymin = 0, ymax = 20, dy = 5, 
+                     xmin = 0.987, xmax = 1.002, dx = 0.002)
+
+p2 <- plot_box_plot(y_str= "residual.sugar", x_str = "mass.density.level", ymin = 0, ymax = 20)
+
+grid.arrange(p1, p2, ncol = 2)
+
+by(ww$residual.sugar, ww$mass.density.level, summary)
+```
+
+    Correlation between residual sugar and mass density is positive and nearly linear. The medians and quartiles increase with mass density. Thus higher mass density wine contains higher residual sugar.
+
+### Chlorides versus mass density
+```{r}
+p1 <- plot_scat_plot(y_str = "chlorides", x_str = "mass.density", 
+                     ymin = 0.01, ymax = 0.07, dy = 0.01, 
+                     xmin = 0.987, xmax = 1.002, dx = 0.002)
+
+p2 <- plot_box_plot(y_str= "chlorides", x_str = "mass.density.level", ymin = 0.01, ymax = 0.07)
+
+grid.arrange(p1, p2, ncol = 2)
+
+by(ww$chlorides, ww$mass.density.level, summary)
+```
+    
+    Correlation between chlorides and mass density is positive and nearly linear. Chlorides increase with mass density. Thus lower mass density wines contain lower chlorides and higher mass density wines contain higher chlorides.
+
+### Total sulfur dioxide versus mass density
+```{r}
+p1 <- plot_scat_plot(y_str = "total.sulfur.dioxide", x_str = "mass.density", 
+                     ymin = 50, ymax = 250, dy = 50, 
+                     xmin = 0.987, xmax = 1.002, dx = 0.002)
+
+p2 <- plot_box_plot(y_str= "total.sulfur.dioxide", x_str = "mass.density.level", ymin = 50, ymax = 250)
+
+grid.arrange(p1, p2, ncol = 2)
+
+by(ww$total.sulfur.dioxide, ww$mass.density.level, summary)
+```
+   
+    Correlation between total sulfur dioxide and mass density is positive and nearly linear. Total sulfur dioxide increases with mass density. Thus lower mass density wines contain lower total sulfur dioxide and higher mass density wines contain higher total sulfur dioxide.
+
+### Alcohol versus mass density
+```{r echo=TRUE}
+p1 <- plot_scat_plot(y_str = "alcohol", x_str = "mass.density", 
+                     ymin = 8, ymax = 15, dy = 1, 
+                     xmin = 0.987, xmax = 1.002, dx = 0.002)
+
+p2 <- plot_box_plot(y_str= "alcohol", x_str = "mass.density.level", ymin = 8, ymax = 15)
+
+grid.arrange(p1, p2, ncol = 2)
+
+by(ww$alcohol, ww$mass.density.level, summary)
+
+```
+    
+    Correlation between alcohol and mass density is negative and linear. Alcohol decreases linearly with mass density. Thus lower mass density wines contain higher alcohol and higher mass density wines contain lower alcohol.
+
+### Quality versus residual sugar
+```{r echo=TRUE, residual.sugarVSresidual.sugar}
+p1 <- plot_scat_plot(y_str = "quality", x_str = "mass.density", 
+                     ymin = 2, ymax = 9, dy = 1, 
+                     xmin = 0.987, xmax = 1.002, dx = 0.002)
+
+p2 <- plot_box_plot(y_str= "quality", x_str = "mass.density.level", ymin = 2, ymax = 9)
+
+grid.arrange(p1, p2, ncol = 2)
+
+by(ww$quality, ww$mass.density.level, summary)
+```
+    
+    Correlation between quality and mass density is negative. Quality decreases with mass density. Thus lower mass density wine is higher quality rank and higher mass density wine is lower quality rank.
+    
+## Observations from the plots
+    Mass density is proportional to residual sugar, chlorides, total sulfur dioxide, but inversely proportional to alcohol and quality. Thus higher mass density wine contains higher amount of residual sugar, chlorides, and total sulfur dioxide, but lower amount of alcohol. Such kind of wine is low quality rank.
+
+# Bivariate Analysis
+
+### Relationships of the feature(s) of interest with other features in the dataset
+Wine quality increases with alcohol and decreases with mass density. Thus higher quality rank should be higher alcohol and lower mass density.
+
+Alcohol decreases with residual sugar, chlorides, total sulfur dioxide, and mass density. Thus higher alcohol wine is less mass density and contains lower amount of residual sugar, chlorides, and total sulfur dioxide.
+
+Mass density increases with residual sugar, chlorides, and total sulfur dioxide, and decreases with alcohol. Thus higher mass density wine contains higher amount of residual sugar, chlorides, and total sulfur dioxide, but lower amount of alcohol.
+
+Finally wine quality decreases with chlorides, total sulfur dioxide, and residual sugar. Thus higher quality rank should have less mass density and contain higher alcohol content, lower amount of chlorides, lower amount of total sulfur dioxide, and lower amount of residual sugar.
+
+### Interesting relationships between other features (not the main feature(s) of interest)
+Apart from the 1st-order and 2nd-order correlations of the main features considered in the analysis, some 2nd-order correlations of other features do not take into account in the analysis. These correlations include total sulfur dioxide and free sulfur dioxide (r = 0.616) as well as pH and fixed acidity (r = -0.426). These features are either correlated to the quality via the 3rd generation main features or are not correlated to the quality within 2nd-order correlation. Thus these correlations are not taken into account in this analysis. 
+
+### The strongest relationship
+The mass density is strongly and positively correlated to residual sugar. The mass density is also strongly and negatively correlated to alcohol. The wine quality is positively correlated to alcohol and negatively correlated mass density. Though these features the wine quality is correlated with other features. 
+
+
+# Multivariate Plots Section
+
+## ggpairs plots
+
+### ggpairs plots by quality rank
+```{r}
+set.seed(1234)
+ww_subset <- ww[, c(2:16)]
+names(ww_subset)
+ww_swap<-ww_subset[sample.int(nrow(ww_subset), 1000), ]
+#ggpairs(ww_swap, colour = "quality.rank")
+```
+
+### ggpairs plots by alcohol degree
+```{r}
+#ggpairs(ww_swap, colour = "alcohol.degree")
+```
+
+### ggpairs plots by mass density level
+```{r}
+#ggpairs(ww_swap, colour = "mass.density.level")
+```
+
+### Observations from the ggpairs plots
+The relations of all variables are shown by different category variables. I will examine the relations of main features more closely for each category variable.
+
+## Multivariate Plots by quality rank
+
+In order to explore the relationship between correlation and distribution of main features in different quality ranks, I will plot histogram plots and density plots of the main features by quality ranks. I will also replot the bivariate histogram plots of the features vs. quality and box plots of features for different quality ranks for comparison.
+
+### Function to create Histogram plots by category variables
+```{r}
+plot_hist_by_color <- function(x_str, by_str, bin_width, 
+                               xmin, xmax, dx, ymin, ymax, dy) 
+  {
+    ggplot(aes_string(x = x_str, color = by_str, fill = by_str), data = ww) + 
+    geom_histogram(binwidth = bin_width) + 
+    scale_x_continuous(limits = c(xmin, xmax), breaks = seq(xmin, xmax, dx)) + 
+    scale_y_continuous(limits = c(ymin, ymax), breaks = seq(ymin, ymax, dy))
+  }
+```
+
+### Function to create scatter plots by category variables
+```{r}
+plot_scat_by_color <- function(y_str, x_str, by_str, ymin, ymax, dy) 
+  {
+    ggplot(aes_string(y = y_str, x = x_str, color = by_str), data = ww) + 
+    geom_jitter(alpha = 1/4) + 
+    stat_smooth(method = "lm", color = "purple") +
+    scale_y_continuous(limits = c(ymin, ymax), breaks = seq(ymin, ymax, dy))
+  }
+```
+
+### Function to create density plots by category variables
+```{r}
+plot_density_by_color <- function(x_str, by_str) 
+  {
+    ggplot(aes_string(x = x_str,color = by_str), data = ww) + 
+    geom_density(size = 1)
+  }
+```
+
+### Function to create box plots by category variables
+```{r}
+plot_box_by_color <- function(y_str, x_str, by_str, ymin, ymax) 
+  {
+    ggplot(aes_string(y = y_str, x = x_str, fill = by_str),data = ww) + 
+    geom_boxplot() + 
+    coord_cartesian(ylim = c(ymin, ymax))
+  }
+```
+
+### Residual sugar versus quality
+```{r}
+p1 <- plot_hist_by_color(x_str = "residual.sugar", by_str = "quality.rank", 
+                         bin_width = 0.0984, xmin = 0, xmax = 30, dx = 2, 
+                         ymin = 0, ymax = 60, dy = 5)
+
+p2 <- plot_scat_by_color(y_str = "residual.sugar", x_str = "quality", 
+                         by_str = "quality.rank", ymin = 0, ymax = 20, dy = 5)
+
+p3 <- plot_density_by_color(x_str = "residual.sugar", by_str = "quality.rank")
+  
+p4 <- plot_box_by_color(y_str = "residual.sugar", x_str = "quality.rank", 
+                        by_str = "quality.rank", ymin = 0, ymax = 20)
+
+grid.arrange(p1, p2, p3, p4, ncol = 2)
+```
+    
+    Distributions are partly overlapped. The correlation between residual sugar and quality is negative. The median of low quality is larger than the others. The median decreases slowly with quality and thus wine quality does not change much with residual sugar.
+    
+### Chlorides versus quality
+```{r}
+p1 <- plot_hist_by_color(x_str = "chlorides", by_str = "quality.rank", 
+                         bin_width = 0.003, xmin = 0, xmax = 0.3, dx = 0.05, 
+                         ymin = 0, ymax = 550, dy = 50)
+
+p2 <- plot_scat_by_color(y_str = "chlorides", x_str = "quality", 
+                         by_str = "quality.rank", 
+                         ymin = 0.015, ymax = 0.075, dy = 0.005)
+
+p3 <- plot_density_by_color(x_str = "chlorides", by_str = "quality.rank")
+  
+p4 <- plot_box_by_color(y_str = "chlorides", x_str = "quality.rank", 
+                        by_str = "quality.rank", ymin = 0.015, ymax = 0.075)
+
+grid.arrange(p1,p2,p3,p4,ncol = 2)
+```
+    
+    Distributions are separated a little bit. Correlation between chlorides and quality is negative. The median for lower quality rank is larger and decreases with quality. Thus higher quality rank contains lower chlorides.
+
+### Total sulfur dioxide versus quality
+```{r}
+p1 <- plot_hist_by_color(x_str = "total.sulfur.dioxide", 
+                         by_str = "quality.rank", bin_width = 5, 
+                         xmin = 0, xmax = 300, dx = 50, 
+                         ymin = 0, ymax = 300, dy = 50)
+
+p2 <- plot_scat_by_color(y_str = "total.sulfur.dioxide", x_str = "quality", 
+                         by_str = "quality.rank", 
+                         ymin = 0, ymax = 300, dy = 50)
+
+p3 <- plot_density_by_color(x_str = "total.sulfur.dioxide", 
+                            by_str = "quality.rank")
+  
+p4 <- plot_box_by_color(y_str = "total.sulfur.dioxide", 
+                        x_str = "quality.rank", by_str = "quality.rank", 
+                        ymin = 0, ymax = 300)
+
+grid.arrange(p1,p2,p3,p4,ncol = 2)
+```
+    
+    Distributions for low quality ranks are separated from others and the distributions of medium and high quality ranks are partly overlapped. Correlation is negative. The median changes with quality slowly. Lower quality rank contains more total sulfur dioxide.
+
+### Mass density versus quality
+```{r}
+p1 <- plot_hist_by_color(x_str = "mass.density", 
+                         by_str = "quality.rank", bin_width = 0.0004, 
+                         xmin = 0.98, xmax = 1.01, dx = 0.005, 
+                         ymin = 0, ymax = 300, dy = 50)
+
+p2 <- plot_scat_by_color(y_str = "mass.density", 
+                         x_str = "quality", by_str = "quality.rank", 
+                         ymin = 0.986, ymax = 1.004, dy = 0.002)
+
+p3 <- plot_density_by_color(x_str = "mass.density", by_str = "quality.rank")
+  
+p4 <- plot_box_by_color(y_str = "mass.density", x_str = "quality.rank", 
+                        by_str = "quality.rank", 
+                        ymin = 0.986, ymax = 1.004)
+
+grid.arrange(p1,p2,p3,p4,ncol = 2)
+```
+    
+    Distributions for different quality ranks are separated from each other. Correlation between mass density and quality is negative. The median decreases with quality. Mass density is larger for lower quality rank.
+
+### Alcohol versus quality
+```{r}
+p1 <- plot_hist_by_color(x_str = "alcohol", by_str = "quality.rank", 
+                         bin_width = 0.1, xmin = 8, xmax = 15, dx = 1, 
+                         ymin = 0, ymax = 250, dy = 50)
+
+p2 <- plot_scat_by_color(y_str = "alcohol", x_str = "quality", 
+                         by_str = "quality.rank", 
+                         ymin = 8, ymax = 14, dy = 1)
+
+p3 <- plot_density_by_color(x_str = "alcohol", by_str = "quality.rank")
+
+p4 <- plot_box_by_color(y_str = "alcohol", 
+                        x_str = "quality.rank", 
+                        by_str = "quality.rank", 
+                        ymin = 8, ymax = 14)
+
+grid.arrange(p1,p2,p3,p4,ncol = 2)
+```
+    
+    Distributions for different quality ranks are very well separated from each other. Correlation between alcohol and quality is positive and strong. The median increases with quality. Thus higher quality rank contains more alcohol and lower quality rank contains less alcohol.
+
+## Multivariate Plots of variable versus alcohol and by quality rank
+
+In order to explore correlations between alcohol and other main features in different quality ranks, I will plot scatter plots of the features vs. alcohol together with the liner fits and box plots of the features at different alcohol degrees by different quality ranks.
+
+### Residual sugar
+```{r echo=TRUE}
+p1 <- plot_scat_by_color(y_str = "residual.sugar", 
+                         x_str = "alcohol", 
+                         by_str = "quality.rank", 
+                         ymin = 0, ymax = 20, dy = 5) + 
+  facet_wrap(~ quality.rank, ncol = 3)
+
+p2 <- plot_box_by_color(y_str = "residual.sugar", 
+                        x_str = "alcohol.degree", 
+                        by_str = "quality.rank", ymin = 0, ymax = 20) + 
+  facet_wrap(~ quality.rank, ncol = 3)
+
+grid.arrange(p1, p2, ncol = 1)
+```
+   
+    Correlation between the residual sugar and alcohol is negative and strong for all quality ranks. The residual sugar decreases (nonlinearly) fast with alcohol from low alcohol degree to medium alcohol degree, but decreases slowly with alcohol from medium alcohol degree to high alcohol degree.
+    
+### Chlorides
+```{r echo=TRUE}
+p1 <- plot_scat_by_color(y_str = "chlorides", 
+                         x_str = "alcohol", 
+                         by_str = "quality.rank", 
+                         ymin = 0.01, ymax = 0.07, dy = 0.01) + 
+  facet_wrap(~ quality.rank, ncol = 3)
+
+p2 <- plot_box_by_color(y_str = "chlorides", 
+                        x_str = "alcohol.degree", 
+                        by_str = "quality.rank", 
+                        ymin = 0.01, ymax = 0.07) + 
+  facet_wrap(~ quality.rank, ncol = 3)
+
+grid.arrange(p1, p2, ncol = 1)
+```
+
+    Correlation between the chlorides and alcohol is negative and strong for all quality ranks. The chlorides decrease nearly linearly with alcohol for all quality ranks.
+
+### Total sulfur dioxide   
+```{r echo=TRUE}
+p1 <- plot_scat_by_color(y_str = "total.sulfur.dioxide", 
+                         x_str = "alcohol", 
+                         by_str = "quality.rank", 
+                         ymin = 50, ymax = 250, dy = 50) + 
+  facet_wrap(~ quality.rank, ncol = 3)
+
+p2 <- plot_box_by_color(y_str = "total.sulfur.dioxide", 
+                        x_str = "alcohol.degree", 
+                        by_str = "quality.rank", 
+                        ymin = 50, ymax = 250) + 
+  facet_wrap(~ quality.rank, ncol = 3)
+
+grid.arrange(p1, p2, ncol = 1)
+```
+   
+        Correlation between the total sulfur dioxide and alcohol is negative and strong for all quality ranks. The total sulfur dioxide decreases approximately linearly with alcohol for all quality ranks.
+
+### Mass density
+```{r echo=TRUE}
+p1 <- plot_scat_by_color(y_str = "mass.density", 
+                         x_str = "alcohol", 
+                         by_str = "quality.rank", 
+                         ymin = 0.987, ymax = 1.003, dy = 0.002) + 
+  facet_wrap(~ quality.rank, ncol = 3)
+
+p2 <- plot_box_by_color(y_str = "mass.density", 
+                        x_str = "alcohol.degree", 
+                        by_str = "quality.rank", 
+                        ymin = 0.987, ymax = 1.003) + 
+  facet_wrap(~ quality.rank, ncol = 3)
+
+grid.arrange(p1, p2, ncol = 1)
+```
+   
+        Correlation between the mass density and alcohol is negative and very strong for all quality ranks. The mass density decreases almost linearly with alcohol for all quality ranks.
+
+## Multivariate Plots of variables versus mass density and by quality rank
+
+In order to explore correlations between mass density and other main features in different quality ranks, I will plot scatter plots of the features vs. mass density together with the liner fits and box plots of the features at different mass density levels by different quality ranks.
+
+### Residual sugar
+```{r echo=TRUE}
+p1 <- plot_scat_by_color(y_str = "residual.sugar", 
+                         x_str = "mass.density", 
+                         by_str = "quality.rank", 
+                         ymin = 0, ymax = 20, dy = 5) + 
+  scale_x_continuous(limits = c(0.986,1.004), breaks=seq(0.986,1.004,0.004)) + 
+  facet_wrap(~ quality.rank, ncol = 3)
+
+p2 <- plot_box_by_color(y_str = "residual.sugar", 
+                        x_str = "mass.density.level", 
+                        by_str = "quality.rank", 
+                        ymin = 0, ymax = 20) + 
+  facet_wrap(~ quality.rank, ncol = 3) + 
+  theme(axis.text = element_text(size = 8))
+
+grid.arrange(p1, p2, ncol = 1)
+```
+   
+    Correlation between the residual sugar and mass density is positive and strong for all quality ranks. The residual sugar increases nearly linearly with mass density for all quality ranks.
+
+### Chlorides
+```{r echo=TRUE}
+p1 <- plot_scat_by_color(y_str = "chlorides", 
+                         x_str = "mass.density", 
+                         by_str = "quality.rank", 
+                         ymin = 0.01, ymax = 0.07, dy = 0.01) + 
+  scale_x_continuous(limits = c(0.986,1.004), breaks=seq(0.986,1.004,0.004)) + 
+  facet_wrap(~ quality.rank, ncol = 3)
+
+p2 <- plot_box_by_color(y_str = "chlorides",
+                        x_str = "mass.density.level", 
+                        by_str = "quality.rank", 
+                        ymin = 0.01, ymax = 0.07) + 
+  facet_wrap(~ quality.rank, ncol = 3) + 
+  theme(axis.text = element_text(size = 8))
+
+grid.arrange(p1, p2, ncol = 1)
+```
+   
+    Correlation between chlorides and mass density is positive. The chlorides increase nearly linearly with mass density for all quality ranks.
+
+### Total sulfur dioxide   
+```{r echo=TRUE}
+p1 <- plot_scat_by_color(y_str = "total.sulfur.dioxide", 
+                         x_str = "mass.density", 
+                         by_str = "quality.rank", 
+                         ymin = 50, ymax = 250, dy = 50) + 
+  scale_x_continuous(limits = c(0.986,1.004), breaks=seq(0.986,1.004,0.004)) + 
+  facet_wrap(~ quality.rank, ncol = 3)
+
+p2 <- plot_box_by_color(y_str = "total.sulfur.dioxide", 
+                        x_str = "mass.density.level", 
+                        by_str = "quality.rank", 
+                        ymin = 50, ymax = 250) + 
+  facet_wrap(~ quality.rank, ncol = 3) + 
+  theme(axis.text = element_text(size = 8))
+
+grid.arrange(p1, p2, ncol = 1)
+```
+   
+    Correlation between total sulfur dioxide and mass density is positive and nearly linear. The total sulfur dioxide increases nearly linearly with mass density level for all quality ranks.
+    
+### Alcohol
+```{r echo=TRUE}
+p1 <- plot_scat_by_color(y_str = "alcohol", 
+                         x_str = "mass.density", 
+                         by_str = "quality.rank", 
+                         ymin = 8, ymax = 15, dy = 1) + 
+  scale_x_continuous(limits = c(0.986,1.004), breaks=seq(0.986,1.004,0.004)) + 
+  facet_wrap(~ quality.rank, ncol = 3)
+
+p2 <- plot_box_by_color(y_str = "alcohol", 
+                        x_str = "mass.density.level", 
+                        by_str = "quality.rank", 
+                        ymin = 8, ymax = 15) + 
+  facet_wrap(~ quality.rank, ncol = 3) + 
+  theme(axis.text = element_text(size = 8))
+
+grid.arrange(p1, p2, ncol = 1)
+```
+
+    Correlation between alcohol and mass density is negative and nearly linear for all quality ranks. The alcohol decreases with mass density nearly linearly for all quality ranks.
+
+## Multivariate scatter plots of strongly-correlated variables by quality ranks
+
+In order to compare correlations of different quality ranks, I will plot the scatter plots of any two features by quality ranks in a plot.
+
+### Function to create Histogram plots by category variables
+```{r}
+plot_scat_multi_var_by_color <- function(x_str, y_str, by_str, 
+                                         ymin, ymax, dy, xmin, xmax, dx) 
+  {
+    ggplot(aes_string(x = x_str, y = y_str, color = by_str), data = ww) + 
+    geom_point(alpha = 1/2, size = 3, position = 'jitter') + 
+    scale_y_continuous(limits = c(ymin, ymax), breaks = seq(ymin, ymax, dy)) + 
+    scale_x_continuous(limits = c(xmin, xmax), breaks = seq(xmin, xmax, dx)) + 
+    scale_color_brewer(type = "qual", guide = guide_legend
+                       (title = 'Quality rank', reverse = F, 
+                        override.aes = list(alpha = 1, size = 3)))
+  }
+```
+
+### Alcohol versus mass density and by quality ranks
+```{r}
+plot_scat_multi_var_by_color(x_str = "mass.density", y_str = "alcohol", 
+                             by_str = "quality.rank", 
+                             ymin = 8, ymax = 14, dy = 1, 
+                             xmin = 0.985, xmax = 1.005, dx = 0.005)
+```
+
+    Correlation between alcohol and mass density is negative, strong and nearly linear. Higher quality rank contains higher alcohol and has less mass density.
+
+### Residual sugar versus mass density and by quality ranks
+```{r}
+plot_scat_multi_var_by_color(x_str = "mass.density", 
+                             y_str = "residual.sugar", 
+                             by_str = "quality.rank", 
+                             ymin = 0, ymax = 25, dy = 5, 
+                             xmin = 0.985, xmax = 1.005, dx = 0.005)
+```
+
+    Correlation between residual sugar and mass density is positive, strong and approximately linear. Higher quality rank contains higher residual sugar or has less mass density.
+
+### Alcohol versus residual sugar and by quality ranks
+```{r}
+plot_scat_multi_var_by_color(x_str = "residual.sugar", 
+                             y_str = "alcohol", 
+                             by_str = "quality.rank", 
+                             ymin = 8, ymax = 14, dy = 1, 
+                             xmin = 0, xmax = 20, dx = 5)
+```
+
+    Correlation between alcohol and residual sugar is negative. Higher quality rank has higher alcohol and lower residual sugar.
+
+### Total sulfur dioxide versus free sulfur dioxide and by quality ranks
+```{r}
+plot_scat_multi_var_by_color(x_str = "free.sulfur.dioxide", 
+                             y_str = "total.sulfur.dioxide", 
+                             by_str = "quality.rank", 
+                             ymin = 0, ymax = 250, dy = 50, 
+                             xmin = 0, xmax = 80, dx = 20)
+```
+
+    Correlation between free sulfur dioxide and total sulfur dioxide is positive and nearly linear. The distributions for different quality ranks cannot be well separated.
+
+### Total sulfur dioxide versus mass density and by quality ranks
+```{r}
+plot_scat_multi_var_by_color(x_str = "mass.density", 
+                             y_str = "total.sulfur.dioxide", 
+                             by_str = "quality.rank", 
+                             ymin = 0, ymax = 250, dy = 50, 
+                             xmin = 0.985, xmax = 1.005, dx = 0.005)
+```
+
+    Correlation between total sulfur dioxide and mass density is positive and approximately linear. Higher quality rank has less mass density and less total sulfur dioxide.
+
+### Alcohol versus quality and by quality ranks
+```{r}
+plot_scat_multi_var_by_color(x_str = "quality", 
+                             y_str = "alcohol", 
+                             by_str = "quality.rank", 
+                             ymin = 8, ymax = 15, dy = 1, 
+                             xmin = 3, xmax = 9, dx = 1)
+```
+
+    Correlation between alcohol and quality is positive and nearly linear. Higher quality rank contains higher alcohol.
+
+### Mass density versus quality and by quality ranks
+```{r}
+plot_scat_multi_var_by_color(x_str = "quality", 
+                             y_str = "mass.density", 
+                             by_str = "quality.rank", 
+                             ymin = 0.985, ymax = 1.005, dy = 0.005, 
+                             xmin = 3, xmax = 9, dx = 1)
+```
+
+    Correlation between mass density and quality is negative and nearly linear. Higher quality rank has lower mass density.
+
+### Residual sugar versus quality and by quality ranks
+```{r}
+plot_scat_multi_var_by_color(x_str = "quality", 
+                             y_str = "residual.sugar", 
+                             by_str = "quality.rank", 
+                             ymin = 0, ymax = 30, dy = 5, 
+                             xmin = 3, xmax = 9, dx = 1)
+```
+
+    Correlation between residual sugar and quality is negative. Higher quality contains less residual sugar.
+
+### Alcohol versus chlorides and by quality ranks
+```{r}
+plot_scat_multi_var_by_color(x_str = "alcohol", 
+                             y_str = "chlorides", 
+                             by_str = "quality.rank", 
+                             ymin = 0, ymax = 0.08, dy = 0.02, 
+                             xmin = 8, xmax = 14, dx = 1)
+```
+
+    Correlation between chlorides and alcohol is negative and approximately linear. Higher quality rank contains higher alcohol and lower chlorides.
+
+### Total sulfur dioxide versus alcohol and by quality ranks
+```{r}
+plot_scat_multi_var_by_color(x_str = "alcohol", 
+                             y_str = "total.sulfur.dioxide", 
+                             by_str = "quality.rank", 
+                             ymin = 0, ymax = 250, dy = 50, 
+                             xmin = 8, xmax = 15, dx = 1)
+```
+
+    Correlation between total sulfur dioxide and alcohol is negative. Higher quality rank contains higher alcohol and lower total sulfur dioxide.
+
+### Total sulfur dioxide versus residual sugar and by quality ranks
+```{r}
+plot_scat_multi_var_by_color(x_str = "residual.sugar", 
+                             y_str = "total.sulfur.dioxide", 
+                             by_str = "quality.rank", 
+                             ymin = 0, ymax = 250, dy = 50, 
+                             xmin = 0, xmax = 20, dx = 5)
+```
+
+    Correlation between total sulfur dioxide and residual sugar is positive. The distributions for different quality ranks cannot be well separated.
+
+
+## Relationship of most strong correlated features and quality
+
+In order to further explore the relationship of most strong correlated features and quality, I will plot scatter plots and box plots by different quality ranks.
+
+### Comparison of scatter plots of most strong correlations
+```{r echo=TRUE}
+p1 <- plot_scat_multi_var_by_color(x_str = "mass.density", 
+                                   y_str = "alcohol", 
+                                   by_str = "quality.rank", 
+                                   ymin = 8, ymax = 14, dy = 1, 
+                                   xmin = 0.985, xmax = 1.005, dx = 0.005)
+
+p2 <- plot_scat_multi_var_by_color(x_str = "mass.density", 
+                                   y_str = "residual.sugar", 
+                                   by_str = "quality.rank", 
+                                   ymin = 0, ymax = 20, dy = 5, 
+                                   xmin = 0.985, xmax = 1.005, dx = 0.005)
+
+grid.arrange(p1, p2, ncol = 2)
+```
+
+    Correlation between alcohol and mass density is negative, strong and nearly linear. Higher quality rank contains higher alcohol and has less mass density.
+    
+    Correlation between residual sugar and mass density is positive, strong and nearly linear. Lower quality rank contains lower residual sugar or has larger mass density. The residual sugar of higher quality rank cannot be separated from that of medium quality rank.
+
+### Mass density versus alcohol by quality ranks.
+```{r}
+p1 <- plot_scat_multi_var_by_color(x_str = "mass.density", 
+                                   y_str = "alcohol", 
+                                   by_str = "quality.rank", 
+                                   ymin = 8, ymax = 14, dy = 1, 
+                                   xmin = 0.985, xmax = 1.005, dx = 0.005)
+
+p2 <- plot_box_by_color(y_str = "mass.density", x_str = "alcohol.degree", 
+                        by_str = "quality.rank", ymin = 0.985, ymax = 1.005)
+
+grid.arrange(p1, p2, ncol = 2)
+```
+
+    Lower quality ranks have higher mass density and lower alcohol, and higher quality ranks have lower mass density and higher alcohol.
+    
+    In medium and high alcohol wines, the mass density decreases with quality and thus the mass density of higher quality is smaller. However, in low alcohol wines, the mass density increases with quality and thus the mass density of higher quality is larger.
+
+
+## Multivariate plots of crossing correlations
+
+In order to explore how a feature introduced impacts on the relationship of others, I will plot scatter plots of main features vs. alcohol for different quality ranks by mass density levels and box plots of main features for different alcohol degrees at different quality ranks by mass density levels.
+
+### Function to create scatter plots of crossing correlations
+```{r}
+plot_scat_multi_var_cross <- function(y_str, x_str, by_str, ymin, ymax, dy)
+  {
+    ggplot(aes_string(y = y_str, x = x_str, color = by_str), data = ww) + 
+    geom_jitter(alpha = 1/4) + 
+    scale_y_continuous(limits = c(ymin,  ymax), breaks=seq(ymin, ymax, dy)) + 
+    facet_wrap(~ quality.rank, ncol = 3)
+  }
+```
+
+### Function to create box plots of crossing correlations
+```{r}
+plot_box_multi_var_cross <- function(y_str, x_str, by_str, ymin, ymax)
+  {
+    ggplot(aes_string(y = y_str, x = x_str, fill = by_str), data = ww) + 
+    geom_boxplot() + 
+    coord_cartesian(ylim = c(ymin, ymax)) + 
+    facet_wrap(~ quality.rank, ncol=3)
+  }
+```
+
+### Residual sugar vesus alcohol by mass density and quality 
+```{r}
+p1 <- plot_scat_multi_var_cross(y_str="residual.sugar", 
+                                x_str = "alcohol",
+                                by_str = "mass.density.level", 
+                                ymin = 0, ymax = 20, dy =5)
+  
+p2 <- plot_box_multi_var_cross(y_str = "residual.sugar", 
+                               x_str = "alcohol.degree", 
+                               by_str = "mass.density.level", 
+                               ymin = 0, ymax = 20)
+
+grid.arrange(p1, p2, ncol = 1)
+```
+
+    In all quality ranks, low mass density almost always corresponds to high alcohol and low residual sugar, and high mass density almost always corresponds to low alcohol and high residual sugar. Most low quality ranks have high residual sugar, low alcohol, and high mass density. In medium quality rank, the number of low mass density wines is quite close to that of medium and high mass density wines. It seems that more high quality ranks have low mass density, high alcohol, and low residual sugar.
+   
+    In all quality ranks and for all alcohol degrees, the residual sugar increases with mass density monotonically.
+   
+    Using these plots one can learn some physicochemical characteristics of white wines. For example, the mass density and residual sugar are low for most of high quality and high alcohol wines.
+
+### Total sulfur dioxide vesus alcohol by mass density and quality 
+```{r}
+p1 <- plot_scat_multi_var_cross(y_str="total.sulfur.dioxide", 
+                                x_str = "alcohol", 
+                                by_str = "mass.density.level", 
+                                ymin = 0, ymax = 300, dy =50)
+  
+p2 <- plot_box_multi_var_cross(y_str = "total.sulfur.dioxide", 
+                               x_str = "alcohol.degree", 
+                               by_str = "mass.density.level", 
+                               ymin = 0, ymax = 300)
+
+grid.arrange(p1, p2, ncol = 1)
+```
+
+    For all quality ranks, low mass density almost always corresponds to high alcohol and low total sulfur dioxide, and high mass density almost always corresponds to low alcohol and high total sulfur dioxide. 
+   
+   In medium quality rank the total sulfur dioxide increases with mass density monotonically for all alcohol degrees. In low quality rank, the total sulfur dioxide increases monotonically with mass density only for medium alcohol but does not change monotonically for low and high alcohol. In high quality rank, the total sulfur dioxide does not change monotonically.
+   
+### Chlorides vesus alcohol by mass density and quality 
+```{r}
+p1 <- plot_scat_multi_var_cross(y_str="chlorides", 
+                                x_str = "alcohol", 
+                                by_str = "mass.density.level", 
+                                ymin = 0, ymax = 0.1, dy =0.02)
+  
+p2 <- plot_box_multi_var_cross(y_str = "chlorides", 
+                               x_str = "alcohol.degree", 
+                               by_str = "mass.density.level", 
+                               ymin = 0, ymax = 0.1)
+
+grid.arrange(p1, p2, ncol = 1)
+```
+
+    For all quality ranks, low mass density almost always corresponds to high alcohol and low chlorides, and high mass density almost always corresponds to low alcohol and high chlorides. 
+   
+    In medium alcohol degree, the chlorides increase with mass density monotonically for all quality ranks. In low alcohol degree and high alcohol degree, the chlorides do not change monotonically with mass density.
+
+
+# Multivariate Analysis
+### Some relationships observed that strengthen the feature(s) of interest
+
+Histogram and density plots of distributions of variables for different quality ranks (colors) have been used to examine how the variables distribute in different quality ranks.  This will strengthen or weaken conclusions from other analysis using different plot.  For example, the distributions of alcohol for different quality ranks are well separated from each other.  Thus the alcohol in different quality ranks is obviously different. This strengthens the conclusion that the alcohol changes (increases) with quality. 
+The box plots for different alcohol and mass density by quality ranks provides more detailed information about how the wine quality changes with the features under some conditions.  In general the features behave in different ways under different conditions. By checking these plots one may find more interesting results. 
+By comparing scatter plots of different quality ranks, one can also dig out some information about how the variables distribute in different quality ranks.
+Multivariate plots of crossing correlations offer an overall view of correlation of different features.  One can learn more characteristics of different kind of wines. Some new relations have been found from the crossing correlation plots.
+
+
+### Some interesting or surprising interactions between features
+
+When new features are introduced into the multivariate plots, some new and interesting interactions come out.
+
+As already known that the correlation of mass density and quality is negative and thus the mass density decreases with the quality. When alcohol is introduced, the conclusion is changed. In medium and high alcohol degrees, the mass density also decreases with quality and thus the mass density of higher quality is smaller. However, in low alcohol wines, the mass density increases with quality and thus the mass density of higher quality is larger. This surprised me.
+
+Similar interactions are also found in crossing correlation plots for some other features. In the crossing correlation plots, the total sulfur dioxide and chlorides are no longer change monotonically with mass density after some other features are introduced in the plots.
+
+
+# Final Plots and Summary
+### Plot One
+```{r echo=TRUE, Plot_One, fig.width=12, fig.height=12}
+p1 <- plot_hist_by_color(x_str = "alcohol", by_str = "quality.rank", 
+                         bin_width = 0.1, xmin = 8, xmax = 15, dx = 1, 
+                         ymin = 0, ymax = 250, dy = 50) + 
+  xlab("Alcohol (% volume)") + ylab("Count") + 
+  ggtitle("Alcohol frequency by quality rank") + 
+  theme(plot.title = element_text(size=18), legend.justification=c(1,0), 
+        legend.position=c(1,0.75), axis.text = element_text(size = 12), 
+        axis.title=element_text(size=15), legend.title=element_text(size=12), 
+        legend.text = element_text(size = 12)) + 
+  scale_fill_discrete(name="Quality rank") + 
+  scale_color_discrete(name="Quality rank")
+
+p2 <- plot_scat_by_color(y_str = "alcohol", x_str = "quality", 
+                         by_str = "quality.rank", 
+                         ymin = 8, ymax = 15, dy = 1) + 
+  xlab("Quality") + ylab("Alcohol (% volume)") + 
+  ggtitle("Alcohol vs quality by quality rank and linear fit") + 
+  scale_colour_discrete(name = "Quality rank") + 
+  scale_x_continuous(limits = c(3, 9), breaks = seq(3, 9, 2)) +
+  theme(plot.title = element_text(size=18), legend.justification=c(1,0), 
+        legend.position=c(0.34,0.75), axis.text = element_text(size = 12), 
+        axis.title=element_text(size=15), legend.title=element_text(size=12), 
+        legend.text = element_text(size = 12))
+
+p3 <- plot_density_by_color(x_str = "alcohol", by_str = "quality.rank") + 
+  xlab("Alcohol (% volume)") + ylab("Density") + 
+  ggtitle("Alcohol density by quality rank") + 
+  scale_colour_discrete(name = "Quality rank") + 
+  scale_x_continuous(limits = c(8, 15), breaks = seq(8, 15, 1)) +
+  theme(plot.title = element_text(size=18), legend.justification=c(1,0), 
+        legend.position=c(1,0.75), axis.text = element_text(size = 12), 
+        axis.title=element_text(size=15), legend.title=element_text(size=12), 
+        legend.text = element_text(size = 12))
+
+p4 <- plot_box_by_color(y_str = "alcohol", x_str = "quality.rank", 
+                        by_str = "quality.rank", ymin = 8, ymax = 15) + 
+  xlab("Quality rank") + ylab("Alcohol (% volume)")  + 
+  ggtitle("Alcohol by quality rank") + 
+  scale_fill_discrete(name = "Quality rank") + 
+  scale_y_continuous(limits = c(8, 15), breaks = seq(8, 15, 1)) +
+  theme(plot.title = element_text(size=18), legend.justification=c(1,0), 
+        legend.position=c(0.34,0.75), axis.text = element_text(size = 12), 
+        axis.title=element_text(size=15), legend.title=element_text(size=12), 
+        legend.text = element_text(size = 12))
+
+grid.arrange(p1,p2,p3,p4,ncol = 2)
+```
+
+### Description One
+Distributions of different quality ranks are very well separated from each other. Correlation between alcohol and quality is positive and nearly linear. The median increases with quality. Higher quality rank contains more alcohol and lower quality rank contains less alcohol, which can be seen clearly from statistical insights given below.
+
+### Statistical insights
+```{r}
+by(ww$alcohol.degree, ww$quality.rank, summary)
+```
+
+```{r}
+by(ww$alcohol, ww$quality.rank, summary)
+```
+
+Most high quality wines contain 12.5% alcohol by volume, most low quality wines contain 9.4% alcohol by volume, and most medium quality wines contain 11% alcohol by volume. These numbers are very closed to or a little bit more than the medians: 9.6%, 10.8%, and 12.0% alcohol by volume for low, medium, and high quality wines. This is a reasonable and significant result.
+
+### Plot Two
+```{r echo=TRUE, Plot_Two, fig.width=12, fig.height=6}
+p1 <- plot_scat_multi_var_by_color(y_str = "mass.density", x_str = "alcohol", 
+                                   by_str = "quality.rank", 
+                                   xmin = 8, xmax = 14, dx = 1, 
+                                   ymin = 0.985, ymax = 1.005, dy = 0.005) + 
+  ylab("Mass density (g/cm^3)") + xlab("Alcohol (% volume)") + 
+  ggtitle("Mass density vs alcohol by quality rank") + 
+  theme(plot.title = element_text(size=18),legend.justification=c(1,0), 
+        legend.position=c(1,0.75), axis.text = element_text(size = 12), 
+        axis.title=element_text(size=15), legend.title=element_text(size=12), 
+        legend.text = element_text(size = 12))
+
+p2 <- plot_box_by_color(y_str = "mass.density", x_str = "alcohol.degree", 
+                        by_str = "quality.rank", 
+                        ymin = 0.985, ymax = 1.005) + 
+  xlab("Alcohol degree") + ylab("Mass density (g/cm^3)") + 
+  ggtitle("Mass density vs alcohol degree by quality rank") + 
+  theme(plot.title = element_text(size=18),legend.justification=c(1,0), 
+        legend.position=c(1,0.75), axis.text = element_text(size = 12), 
+        axis.title=element_text(size=15), legend.title=element_text(size=12), 
+        legend.text = element_text(size = 12)) + 
+  scale_fill_discrete(name = "Quality rank")
+
+grid.arrange(p1, p2, ncol = 2)
+```
+
+### Description Two
+Lower quality ranks have higher mass density and lower alcohol, while higher quality ranks have lower mass density and higher alcohol.
+
+In medium and high alcohol degrees, mass density decreases with quality and thus the mass density of higher quality rank is smaller. However, in low alcohol degree, the mass density increases with quality and thus the mass density of higher quality is larger. This is a very interesting finding.
+
+### Statistical insights
+```{r}
+by(ww$mass.density.level, ww$alcohol.degree, summary)
+```
+
+Most high quality wines contain high alcohol (~12.5% by volume) with low mass density of 0.990 g/cm^3, most low quality wines contain low alcohol (~9.4% by volume) with high mass density of 0.995 g/cm^3, while most medium quality wines contain 11% alcohol by volume with 0.992 g/cm^3, which are in between those of low and high quality wines.
+
+### Plot Three
+```{r echo=TRUE, Plot_Three, fig.width = 12, fig.height = 10}
+p1 <- plot_scat_multi_var_cross(y_str = "residual.sugar", x_str = "alcohol", 
+                                by_str = "mass.density.level", 
+                                ymin = 0, ymax = 22, dy = 5) + 
+  xlab("Alcohol (% volume)") + ylab("Residual sugar (g/dm^3)") + 
+  ggtitle("Residual sugar vs alcohol by quality rank and mass density level") + 
+  scale_colour_discrete(name = "Mass density level") + 
+  theme(plot.title = element_text(size = 18), legend.justification = c(1,0), 
+        legend.position = c(1, 0.68), axis.text = element_text(size = 12), 
+        axis.title=element_text(size=15), legend.title=element_text(size=12), 
+        legend.text = element_text(size = 12)) 
+
+p2 <- plot_box_multi_var_cross(y_str = "residual.sugar", 
+                               x_str = "alcohol.degree", 
+                               by_str = "mass.density.level", 
+                               ymin = 0, ymax = 22) + 
+  xlab("Alcohol degree") + ylab("Residual sugar (g/dm^3)") + 
+  ggtitle("Residual sugar vs alcohol degree by quality rank and mass density level") + 
+  scale_fill_discrete(name = "Mass density level") + 
+  theme(plot.title = element_text(size = 18),legend.justification = c(1,0), 
+        legend.position = c(1, 0.68), axis.text = element_text(size = 12), 
+        axis.title=element_text(size=15), legend.title=element_text(size=12), 
+        legend.text = element_text(size = 12)) 
+
+grid.arrange(p1, p2, ncol = 1)
+```
+
+### Description Three
+In all quality ranks, low mass density almost always corresponds to high alcohol and low residual sugar, while high mass density almost always corresponds to low alcohol and high residual sugar. It seems that in low quality ranks, the number of wines with high residual sugar, low alcohol, and high mass density is larger than other wines. In medium quality rank, the number of low mass density wines is quite close to that of medium and high mass density wines. In high quality rank, the number of wines with low mass density and thus high alcohol and low residual sugar is little bit larger than the others.
+
+In all quality ranks and for all alcohol degrees, the residual sugar increases with mass density monotonically.
+
+### Statistical insights
+```{r}
+by(ww$mass.density.level, ww$quality.rank, summary)
+```
+
+```{r}
+by(ww$alcohol.degree, ww$mass.density.level, summary)
+```
+
+Most low quality wines have high mass density (>=0.9950 g/cm^3) and contain low alcohol (~9.4% by volume) and high residual sugar (>=7.5 g/dm^3), while most high quality wines have low mass density (<0.9920 g/cm^3) and contain high alcohol (~12.5% by volume) and low residual sugar (<5 g/dm^3). In medium quality wines, when only the mass density is considered, the number of low mass density wines is higher than all the others. However, as already known, most medium quality wines contain medium alcohol (~11% by volume). When both alcohol and mass density are taken into account together, most medium quality wines will have medium mass density (>=0.9920 g/cm^3 and <0.9950 g/cm^3) contain medium alcohol and medium residual sugar (>=5 g/dm^3 and <7.5 g/dm^3).
+
+# Reflection
+The dataset I explored contains 13 variables and 4898 observations. I created 3 new variables during the analysis. I am so confused and upset at very beginning when I was trying to work on the data analysis because I knew very little about wines and I did not know where I began with and what I should focus on. What I only knew was to explore the relationship between wine quality and physicochemical characteristics (the features). So I started to make plots aimlessly for quality and variables. After a couple of days I realized that performing data analysis by just making plots might spend lot of time and eventually may be just waste of time without any results. So I set about statistical analysis on the data. I first computed medians, means, 1st and 3rd quartiles for every single variable, and made the population plots for the variables. Then I explored the relationships of quality and variables. The start point of this exploration is to compute and check the correlation coefficients of every pair of variables and quality. I grouped the correlations into different orders. Through the correlation coefficients, I figured out the possible features that may have most significant impact on the wine quality. I isolated the features that have stronger correlations directly with the quality and the features that have strong correlations with the features directly correlated to the quality. To make this much clearer I made a correlation tree according to the correlation coefficients. From this tree, I had a very clear idea what I should focus my study on and where I should start. Therefore, I proposed to investigate how the wine quality changes with the main features: density, alcohol, residual sugar, total sulfur dioxide, and chlorides, as well as how the correlations between features influence the wine quality.
+
+After visualized analysis by plotting the relationships of features and wine quality, I found and confirmed the following relations.
+
+1. Wine quality increases with alcohol and decreases with mass density. Thus higher quality wine should be the wine with higher alcohol and lower mass density.
+
+2. Alcohol decreases with residual sugar, chlorides, total sulfur dioxide, and mass density. Thus higher alcohol wine has less mass density and contains lower amount of residual sugar, chlorides, and total sulfur dioxide.
+
+3. Mass density increases with residual sugar, chlorides, and total sulfur dioxide, and decreases with alcohol. Thus higher mass density wine contains higher amount of residual sugar, chlorides, and total sulfur dioxide, but lower amount of alcohol.
+
+4. Finally wine quality decreases with chlorides, total sulfur dioxide, and residual sugar. Thus higher quality wine should have less mass density and contain higher alcohol content, lower amount of chlorides, lower amount of total sulfur dioxide, and lower amount of residual sugar.
+
+
+Some semi-quantitative results:
+
+    Table 1. Alcohol, mass density and residual sugar for different quality wines
+       ------------------------------------------------------------------------
+        Wine quality     |    Alcohol    |  Mass density   |  Residual sugar
+                         |   (% volume)  |    (g/cm^3)     |    (g/dm^3)
+       ------------------------------------------------------------------------
+        Low qualiy       |     8 ~ 9.5   | 0.9950 ~ 1.0390 |    7.5 ~ 65.8 
+        Medium quality   |   9.5 ~ 11.5  | 0.9920 ~ 0.9950 |    5.0 ~ 7.5
+        High quality     |  11.5 ~ 14.2  | 0.9871 ~ 0.9920 |    0.6 ~ 5.0
+       ------------------------------------------------------------------------
+    
+
+
+
+What surprised me during the investigation are:
+
+1. The wine quality is so dependent of mass density, a physical characteristic,
+
+2. The relations of wine quality with features change when some new features are introduced due to the correlations.
+
+
+Because some unexplored features may have large effect on wine quality, I will propose to explore the relationships of wine quality with the features having higher order correlations with the quality (I did not examine those features in this analysis). Relative ratios of physicochemical components may make significant contribution to wine quality. Therefore exploring the relationship of wine quality with the relative ratios is also one of the tasks in the future. In addition, I am also interested in testing some models such as linear model to predict the wine quality. Recent researches [1, 2] would be valuable references and resources for my research for comparisons.
+
+
+
+# References
+
+[1] P. Cortez, A. Cerdeira, F. Almeida, T. Matos and J. Reis, 2009. 
+    Modeling wine preferences by data mining from physicochemical properties.
+    In Decision Support Systems, Elsevier, 47(4):547-553. ISSN: 0167-9236.
+    Available at: [@Elsevier] http://dx.doi.org/10.1016/j.dss.2009.05.016
+
+[2] P. Appalasamy, A. Mustapha, N.D. Rizal, F. Johari and A.F. Mansor, 2012. Classification-based Data Mining Approach for Quality Control in Wine Production. Journal of Applied Sciences, 12: 598-601. DOI: 10.3923/jas.2012.598.601. URL: http://scialert.net/abstract/?doi=jas.2012.598.601  
